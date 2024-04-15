@@ -23,13 +23,6 @@ func obtenerRegistro(dominio string) string {
 	return "No se pudo encontrar el dominio"
 }
 
-type DNS_list struct {
-	dominio string
-	ipAddr  string
-	TTL     string
-	tipo    string
-}
-
 func main() {
 
 	conexion, err := net.ListenPacket("udp", "localhost:63420")
@@ -50,7 +43,7 @@ func main() {
 		}
 
 		// Imprime el mensaje recibido
-		// fmt.Printf("Mensaje recibido desde %s: %s\n", clientAddr, string(buffer[:n]))
+		//fmt.Printf("Mensaje recibido desde %s: %s\n", clientAddr, string(buffer[:n])) //recibe A, O o Stop
 
 		var dominio string
 		var ip string
@@ -83,23 +76,29 @@ func main() {
 			continue
 		}
 
-		dominio = strings.Split(string(buffer[:n]), " ")[0]
-		ip = strings.Split(string(buffer[:n]), " ")[1]
-		ttl = strings.Split(string(buffer[:n]), " ")[2]
-		tipo = strings.Split(string(buffer[:n]), " ")[3]
-
 		if msg == "A" {
+			//fmt.Printf("Mensaje recibido desde %s: %s\n", clientAddr, string(buffer[:n]))
+			dominio = strings.Split(string(buffer[:n]), " ")[0]
+			ip = strings.Split(string(buffer[:n]), " ")[1]
+			ttl = strings.Split(string(buffer[:n]), " ")[2]
+			tipo = strings.Split(string(buffer[:n]), " ")[3]
 			agregarRegistro(dominio, ip, ttl, tipo)
 		}
 		if msg == "O" {
-			mje := obtenerRegistro(dominio)
-			mensaje := []byte(mje)
-			_, err = conexion.WriteTo(mensaje, clientAddr)
-			if err != nil {
-				fmt.Println("Error al responder al cliente UDP:", err)
-				continue
+			if len(DNS) == 0 {
+				fmt.Println("No hay datos en el servidor")
+				mensaje := []byte("No hay datos en el servidor")
+				_, err = conexion.WriteTo(mensaje, clientAddr)
+			} else {
+				dominio := string(buffer[:n])
+				mje := obtenerRegistro(dominio)
+				mensaje := []byte(mje)
+				_, err = conexion.WriteTo(mensaje, clientAddr)
+				if err != nil {
+					fmt.Println("Error al responder al cliente UDP:", err)
+					continue
+				}
 			}
-
 		}
 
 		// Obtener la dirección IP del cliente UDP
@@ -114,8 +113,8 @@ func main() {
 
 		// Cerrar la conexión UDP
 		// conexion.Close()
-		break // Salir del bucle después de cerrar la conexión
+		//break // Salir del bucle después de cerrar la conexión
 	}
-	fmt.Println("Conexión UDP cerrada")
+	//fmt.Println("Conexión UDP cerrada")
 	conexion.Close()
 }

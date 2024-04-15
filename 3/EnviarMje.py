@@ -10,11 +10,12 @@ clientSocket = skt.socket(skt.AF_INET, skt.SOCK_DGRAM)
 
 # Solicito mensajes y luego ejecuto las funciones para conectar al servidor y realizar el intercambio de mensajes.
 toSend = input("Para agregar un registro pulse A. Para obtener pulse O. Para salir escriba STOP\n>")
+toSend = toSend.upper()
 if toSend == "STOP":
 	clientSocket.sendto(toSend.encode(), (serverAddr,serverPort))
 	print("Programa Finalizado")
 
-elif toSend.upper() == "A":
+elif toSend == "A":
 	clientSocket.sendto(toSend.encode(), (serverAddr,serverPort))
 	msg, addr = clientSocket.recvfrom(1024)
 	print(msg.decode())
@@ -22,7 +23,7 @@ elif toSend.upper() == "A":
 	toSend = input("Agregue el dominio, ip, ttl y el tipo separados por espacios\n")
 	clientSocket.sendto(toSend.encode(), (serverAddr,serverPort))
 
-elif toSend.upper() == "O":
+elif toSend == "O":
 	clientSocket.sendto(toSend.encode(), (serverAddr,serverPort))
 	msg, addr = clientSocket.recvfrom(1024)
 	print(msg.decode())
